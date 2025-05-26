@@ -1,0 +1,33 @@
+-- CreateTable
+CREATE TABLE "Magasin" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "nom" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "Employe" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "nom" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "Caisse" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "nom" TEXT NOT NULL,
+    "magasinId" INTEGER NOT NULL,
+    "employeId" INTEGER,
+    "ouverteLe" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "Caisse_magasinId_fkey" FOREIGN KEY ("magasinId") REFERENCES "Magasin" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Caisse_employeId_fkey" FOREIGN KEY ("employeId") REFERENCES "Employe" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "ProduitLog" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "produitId" INTEGER NOT NULL,
+    "caisseId" INTEGER NOT NULL,
+    "action" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "ProduitLog_caisseId_fkey" FOREIGN KEY ("caisseId") REFERENCES "Caisse" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "ProduitLog_produitId_fkey" FOREIGN KEY ("produitId") REFERENCES "Produit" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);

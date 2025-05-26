@@ -17,9 +17,14 @@ router.get('/', async (req, res) => {
 //POST pour ajouter un produit
 router.post('/', async (req, res) => {
     const { nom, stock, prix, categorie } = req.body;
+    const caisseId = req.headers['x-caisse-id'];
+
+    if(!caisseId) {
+        return res.status(400).json({ error: 'L\'ID de la caisse est requis.' });
+    }
 
     try {
-        const produit = await ProduitDAO.create({ nom, stock, prix, categorie });
+        const produit = await ProduitDAO.create({ nom, stock, prix, categorie }, parseInt(caisseId, 10));
         res.status(201).json(produit);
     } catch (error) {
         // Prisma error: code P2002 = unique constraint failed
@@ -34,9 +39,14 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     const { id } = req.params;
     const { nom, stock, prix, categorie } = req.body;
+    const caisseId = req.headers['x-caisse-id'];
+
+    if(!caisseId) {
+        return res.status(400).json({ error: 'L\'ID de la caisse est requis.' });
+    }
 
     try {
-        const produit = await ProduitDAO.update(parseInt(id, 10), { nom, stock, prix, categorie });
+        const produit = await ProduitDAO.update(parseInt(id, 10), { nom, stock, prix, categorie }, parseInt(caisseId, 10));
         res.json(produit);
     } catch (error) {
         console.error('Erreur lors de la mise à jour du produit:', error);
@@ -47,9 +57,14 @@ router.put('/:id', async (req, res) => {
 //DELETE pour supprimer un produit
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;
+    const caisseId = req.headers['x-caisse-id'];
 
+    if(!caisseId) {
+        return res.status(400).json({ error: 'L\'ID de la caisse est requis.' });
+    }
+    
     try {
-        const produit = await ProduitDAO.delete(parseInt(id, 10));
+        const produit = await ProduitDAO.delete(parseInt(id, 10), parseInt(caisseId, 10));
         res.json(produit);
     } catch (error) {
         console.error('Erreur lors de la suppression du produit:', error);
