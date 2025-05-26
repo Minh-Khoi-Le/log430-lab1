@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: nouchka/sqlite3:latest
+        ports:
+          - 3306:3306
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Backend tests
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install backend dependencies
+        run: cd server && npm install
+
+      - name: Prisma generate
+        run: cd server && npx prisma generate
+
+      - name: Run backend tests
+        run: cd server && npm test
+
+      # Frontend build
+      - name: Install frontend dependencies
+        run: cd client && npm install
+
+      - name: Build frontend
+        run: cd client && npm run build
+
+      # Docker build (optional)
+      - name: Build Docker images
+        run: docker-compose build
