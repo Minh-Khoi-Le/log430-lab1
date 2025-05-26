@@ -24,12 +24,17 @@ app.get('/produits', async (req, res) => {
 // POST pour ajouter un produit
 app.post('/produits', async (req, res) => {
   const { nom, stock, prix, categorie } = req.body;
+
   try {
     const produit = await prisma.produit.create({
       data: { nom, stock, prix, categorie }
     });
     res.status(201).json(produit);
   } catch (error) {
+    // Prisma error: code P2002 = unique constraint failed
+    if (error.code === "P2002" && error.meta && error.meta.target.includes("nom")) {
+      return res.status(400).json({ error: "Le nom du produit doit être unique." });
+    }
     console.error('Erreur lors de la création du produit:', error);
     res.status(500).json({ error: 'Erreur lors de la création du produit' });
   }
