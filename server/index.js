@@ -32,13 +32,53 @@ app.post('/produits', async (req, res) => {
     res.status(201).json(produit);
   } catch (error) {
     // Prisma error: code P2002 = unique constraint failed
-    if (error.code === "P2002" && error.meta && error.meta.target.includes("nom")) {
+    if (error.code === "P2002" && error.meta?.target?.includes("nom")) {
       return res.status(400).json({ error: "Le nom du produit doit être unique." });
     }
-    console.error('Erreur lors de la création du produit:', error);
     res.status(500).json({ error: 'Erreur lors de la création du produit' });
   }
 });
+
+// DELETE pour supprimer un produit
+app.delete('/produits/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const produit = await prisma.produit.delete({
+      where: { id: parseInt(id, 10) }
+    });
+    res.json(produit);
+  } catch (error) {
+    console.error('Erreur lors de la suppression du produit:', error);
+    res.status(500).json({ error: 'Erreur lors de la suppression du produit' });
+  }
+});
+
+
+// UPDATE pour modifier un produit
+app.put('/produits/:id', async (req, res) => {
+  const { id } = req.params;
+  const { nom, stock, prix, categorie } = req.body;
+    console.log("PUT reçu pour id=", id, "body=", req.body);
+
+  try {
+    const produit = await prisma.produit.update({
+      where: { id: parseInt(id, 10) },
+      data: { nom, stock, prix, categorie }
+    });
+    res.json(produit);
+  } catch (error) {
+    if (error.code === "P2025") {
+      // P2025 = Record to update not found.
+      return res.status(404).json({ error: "Produit introuvable !" });
+    }
+    if (error.code === "P2002" && error.meta?.target?.includes("nom")) {
+      return res.status(400).json({ error: "Le nom du produit doit être unique." });
+    }
+    res.status(500).json({ error: 'Erreur lors de la création du produit' });
+  }
+});
+
 
 
 const PORT = 3800;
